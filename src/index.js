@@ -33,7 +33,6 @@ function renderInitialCards(cards) {
   });
 }
 
-// Opens the image popup, populates it with the clicked image's data
 function handleImageClick(evt) {
   const { src: link, alt: name } = evt.target;
   openModal(popupFullImage);
