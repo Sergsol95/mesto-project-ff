@@ -1,64 +1,63 @@
 import "/src/index.css";
 
 import { initialCards } from "./components/cards.js";
-import { openModal, addListener } from "./components/modal.js";
-import { editForm as profileForm, handleEditFormSubmit } from "./components/edit-form.js";
-import { newCardForm, addCard as handleNewPlaceFormSubmit } from "./components/new-card-form.js";
-import { createCard, deleteCard, toggleLike } from "./components/card.js";
+import { openModal } from "./components/modal.js";
+import { editForm as profileForm, handleProfileFormSubmit } from "./components/edit-form.js";
+import { newPlaceForm, handleAddPlaceSubmit } from "./components/new-card-form.js";
+import { createCardElement, removeCard, handleCardLike } from "./components/card.js";
 
-const placesList = document.querySelector(".places__list");
+const cardsContainer = document.querySelector(".places__list");
 const editProfileButton = document.querySelector(".profile__edit-button");
 const addPlaceButton = document.querySelector(".profile__add-button");
 
 const editProfilePopup = document.querySelector(".popup_type_edit");
 const addPlacePopup = document.querySelector(".popup_type_new-card");
-const popupFullImage = document.querySelector(".popup_type_image");
-export { popupFullImage };
+const imagePopup = document.querySelector(".popup_type_image");
+export { imagePopup };
 
-const popupCloseButtons = {
-  editProfile: editProfilePopup.querySelector(".popup__close"),
-  addPlace: addPlacePopup.querySelector(".popup__close"),
-  fullImage: popupFullImage.querySelector(".popup__close"),
+const popupCloseControls = {
+  edit: editProfilePopup.querySelector(".popup__close"),
+  add: addPlacePopup.querySelector(".popup__close"),
+  image: imagePopup.querySelector(".popup__close"),
 };
 
 function renderInitialCards(cards) {
   cards.forEach((cardData) => {
-    const cardElement = createCard(
+    const cardElement = createCardElement(
       cardData,
-      deleteCard,
-      toggleLike,
-      handleImageClick
+      removeCard,
+      handleCardLike,
+      openImagePopup
     );
-    placesList.append(cardElement);
+    cardsContainer.append(cardElement);
   });
 }
 
-function handleImageClick(evt) {
-  const { src: link, alt: name } = evt.target;
-  openModal(popupFullImage);
-  const popupImage = popupFullImage.querySelector(".popup__image");
-  const popupCaption = popupFullImage.querySelector(".popup__caption");
+function openImagePopup({ link, title }) {
+  openModal(imagePopup);
+  const popupImage = imagePopup.querySelector(".popup__image");
+  const popupCaption = imagePopup.querySelector(".popup__caption");
 
   popupImage.src = link;
-  popupImage.alt = name;
-  popupCaption.textContent = name;
+  popupImage.alt = title;
+  popupCaption.textContent = title;
 }
 
-function setEventListeners() {
+function attachEventListeners() {
   editProfileButton.addEventListener("click", () => openModal(editProfilePopup));
   addPlaceButton.addEventListener("click", () => openModal(addPlacePopup));
 
-  addListener(editProfilePopup, popupCloseButtons.editProfile);
-  addListener(addPlacePopup, popupCloseButtons.addPlace);
-  addListener(popupFullImage, popupCloseButtons.fullImage);
+  addListener(editProfilePopup, popupCloseControls.edit);
+  addListener(addPlacePopup, popupCloseControls.add);
+  addListener(imagePopup, popupCloseControls.image);
 
-  profileForm.addEventListener("submit", (evt) => handleEditFormSubmit(evt, editProfilePopup));
-  newCardForm.addEventListener("submit", (evt) => handleNewPlaceFormSubmit(evt, addPlacePopup));
+  profileForm.addEventListener("submit", (evt) => handleProfileFormSubmit(evt, editProfilePopup));
+  newPlaceForm.addEventListener("submit", (evt) => handleAddPlaceSubmit(evt, addPlacePopup));
 }
 
-function init() {
+function initializeApp() {
   renderInitialCards(initialCards);
-  setEventListeners();
+  attachEventListeners();
 }
 
-init();
+initializeApp();

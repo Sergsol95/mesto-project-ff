@@ -1,10 +1,10 @@
 import { openModal } from "./modal.js";
-import { popupFullImage } from "../index.js";
+import { imagePopup } from "../index.js";
 
 export function showFullImage(evt) {
-  openModal(popupFullImage);
-  const imgElement = popupFullImage.querySelector(".popup__image");
-  const captionElement = popupFullImage.querySelector(".popup__caption");
+  openModal(imagePopup);
+  const imgElement = imagePopup.querySelector(".popup__image");
+  const captionElement = imagePopup.querySelector(".popup__caption");
   imgElement.src = evt.target.src;
   imgElement.alt = evt.target.alt;
   captionElement.textContent = evt.target
