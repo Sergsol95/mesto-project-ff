@@ -1,30 +1,57 @@
-const cardsTemplate = document.querySelector("#card-template").content;
+import { putLike, deleteLike, deleteCardApi } from "../scripts/api";
 
-export function createCardElement(cardObject, deleteCallback, likeCallback, showFullImageCallback) {
-  const cardElement = cardsTemplate.cloneNode(true);
-  const cardImage = cardElement.querySelector(".card__image");
-  const cardTitle = cardElement.querySelector(".card__title");
-  const cardDeleteButton = cardElement.querySelector(".card__delete-button");
-  const cardLikeButton = cardElement.querySelector(".card__like-button");
+function createCard(cardData, handleImageClick, userID) {
+  const { link, name, likes, _id: cardID, owner } = cardData;
+  const template = document.querySelector("#card-template").content;
+  const cardElement = template
+    .querySelector(".places__item")
+    .cloneNode(true);
 
-  cardTitle.textContent = cardObject.name;
-  cardImage.src = cardObject.link;
-  cardImage.alt = cardObject.name;
+  const imageEl = cardElement.querySelector(".card__image");
+  const titleEl = cardElement.querySelector(".card__title");
+  const likeBtn = cardElement.querySelector(".card__like-button");
+  const likeCountEl = cardElement.querySelector(".card__number-likes");
+  const deleteBtn = cardElement.querySelector(".card__delete-button");
 
-  cardDeleteButton.addEventListener("click", (evt) => {
-    const deleteCard = evt.target.closest(".card");
-    deleteCallback(deleteCard);
-  });
-  cardLikeButton.addEventListener("click", likeCallback);
-  cardImage.addEventListener("click", showFullImageCallback);
+  imageEl.src = link;
+  imageEl.alt = name;
+  titleEl.textContent = name;
+  likeCountEl.textContent = likes.length;
+
+  const isOwner = owner._id === userID;
+  if (!isOwner) deleteBtn.remove();
+
+  const isInitiallyLiked = likes.some(user => user._id === userID);
+  if (isInitiallyLiked) {
+    likeBtn.classList.add("card__like-button_is-active");
+  }
+
+  function updateLike() {
+    const action = likeBtn.classList.contains("card__like-button_is-active")
+      ? deleteLike(cardID)
+      : putLike(cardID);
+
+    action
+      .then(updatedCard => {
+        likeCountEl.textContent = updatedCard.likes.length;
+        likeBtn.classList.toggle("card__like-button_is-active");
+      })
+      .catch(err => console.error("Ошибка при обновлении лайка:", err));
+  }
+
+  likeBtn.addEventListener("click", updateLike);
+
+  if (isOwner) {
+    deleteBtn.addEventListener("click", () => {
+      deleteCardApi(cardID)
+        .then(() => cardElement.remove())
+        .catch(err => console.error("Ошибка удаления карточки:", err));
+    });
+  }
+
+  imageEl.addEventListener("click", () => handleImageClick(cardData));
 
   return cardElement;
 }
 
-export function removeCard(cardElement) {
-  cardElement.remove();
-}
-
-export function handleCardLike(evt) {
-  evt.target.classList.toggle("card__like-button_is-active");
-}
+export { createCard };
